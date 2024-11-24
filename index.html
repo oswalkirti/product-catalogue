@@ -12,7 +12,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 400px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -30,10 +30,16 @@
             border-radius: 5px;
         }
         .cart {
-            margin-top: 20px;
-            padding: 10px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 70%;
+            overflow-y: auto;
             border: 1px solid #ccc;
             background: #f9f9f9;
+            padding: 10px;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -102,9 +108,26 @@
         function updateCart() {
             const cartList = document.getElementById("cart");
             cartList.innerHTML = "";
-            cart.forEach(item => {
-                cartList.innerHTML += `<li>${item.quantity} x ${item.product} (${item.company}) - $${item.rate * item.quantity}</li>`;
+            cart.forEach((item, index) => {
+                cartList.innerHTML += `
+                    <li>
+                        ${item.product} (${item.company}) - $${item.rate * item.quantity}
+                        <br>Quantity: 
+                        <input type="number" value="${item.quantity}" min="1" 
+                               onchange="updateQuantity(${index}, this.value)">
+                        <button onclick="removeFromCart(${index})">Remove</button>
+                    </li>`;
             });
+        }
+
+        function updateQuantity(index, newQuantity) {
+            cart[index].quantity = parseInt(newQuantity);
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1); // Remove the item from the cart
+            updateCart();
         }
 
         // Search Functionality
@@ -121,10 +144,33 @@
             });
         }
 
-        // Submit order
+        // Submit order using FormSubmit
         function submitOrder() {
             if (cart.length > 0) {
-                console.log("Order submitted:", cart); // Replace with actual saving logic
+                const orderDetails = cart.map(item => 
+                    `${item.quantity} x ${item.product} (${item.company}) - $${item.rate * item.quantity}`
+                ).join("\n");
+
+                // Create a form dynamically
+                const form = document.createElement("form");
+                form.action = "https://formsubmit.co/oswalkirti@gmail.com"; // Replace with your email
+                form.method = "POST";
+
+                // Add form fields
+                const messageField = document.createElement("input");
+                messageField.type = "hidden";
+                messageField.name = "message";
+                messageField.value = orderDetails;
+                form.appendChild(messageField);
+
+                const subjectField = document.createElement("input");
+                subjectField.type = "hidden";
+                subjectField.name = "_subject";
+                subjectField.value = "Sales Order";
+                form.appendChild(subjectField);
+
+                document.body.appendChild(form);
+                form.submit(); // Submit the form
                 alert("Order submitted successfully!");
                 cart = [];
                 updateCart();
