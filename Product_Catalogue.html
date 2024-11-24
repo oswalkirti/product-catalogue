@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalogue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product Catalogue</h1>
+    <input type="text" id="search" onkeyup="searchTable()" placeholder="Search for products...">
+    <table id="productTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Company</th>
+                <th>Rate</th>
+                <th>MRP</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be loaded dynamically -->
+        </tbody>
+    </table>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        // Load and parse the CSV file
+        Papa.parse('products.csv', {
+            download: true,
+            header: true,
+            complete: function(results) {
+                const tableBody = document.querySelector("#productTable tbody");
+                console.log(results.data); // Log CSV data for debugging
+                results.data.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.Product}</td>
+                        <td>${item.Company}</td>
+                        <td>${item.Rate}</td>
+                        <td>${item.MRP}</td>
+                        <td>${item.Stock}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+        });
+
+        // Dynamic Search Functionality
+        function searchTable() {
+            const input = document.getElementById("search").value.toLowerCase();
+            const rows = document.querySelectorAll("#productTable tbody tr");
+            rows.forEach(row => {
+                const product = row.querySelector("td").textContent.toLowerCase();
+                if (product.includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
